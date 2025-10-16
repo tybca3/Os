@@ -1,0 +1,693 @@
+//Slip 1,5,6             FIFO ref.String
+#include<stdio.h>
+int n=12, nf; 
+int in[20]={0,2,1,6,4,0,1,0,3,1,2,1}; 
+int p[50];
+int hit=0;
+int i,j,k;
+int pgfaultcnt=0;
+
+void getData()
+{
+printf("\nEnter number of Frames:");
+scanf("%d", &nf);
+}
+
+void initialize()
+{
+pgfaultcnt=0;
+for(i=0; i<nf; i++)
+p[i]=9999;
+}
+
+int isHit(int data)
+{
+hit=0;
+for(j=0; j<nf; j++)
+{
+if(p[j]==data)
+{
+hit=1;
+break;
+}
+}
+return hit;
+}
+
+int getHitIndex(int data)
+{
+int hitind;
+for(k=0; k<nf; k++)
+{
+if(p[k]==data)
+{
+hitind=k;
+break;
+}
+}
+return hitind;
+}
+
+void disPages()
+{
+for(k=0; k<nf; k++)
+{
+if(p[k]!=9999)
+printf("%d",p[k]);
+}
+}
+
+void disPgFaultCnt()
+{
+printf("\nTotal number of page faults:%d",pgfaultcnt);
+}
+
+void fifo()
+{
+initialize();
+for(i=0; i<n; i++)
+{
+printf("\nFor %d :", in[i]);
+
+if(isHit(in[i])==0)
+{
+for(k=0; k<nf-1;k++)
+p[k]=p[k+1];
+
+p[k]=in[i];
+pgfaultcnt++;
+disPages();
+}
+else
+printf(" No page fault");
+}
+disPgFaultCnt();
+}
+
+int main()
+{
+getData();
+fifo();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Slip 2 ,14,13  SJF Non-Preemptive
+#include<stdio.h>
+#include<stdlib.h>
+#include<stdbool.h>
+#include<limits.h>
+
+#define MAX 100
+
+int main() {
+int n;
+int pid[MAX], at[MAX], bt1[MAX], bt2[MAX];
+int st[MAX], ct[MAX], tat[MAX], wt[MAX];
+bool completed[MAX] = {false};
+int current_time = 0, completed_count = 0;
+float total_tat = 0, total_wt = 0;
+
+printf("Enter number of processes: ");
+scanf("%d", &n);
+
+for (int i =0;
+i< n; i++) {
+pid[i] = i + 1;
+printf("Enter arrival time for Process P%d: ",pid[i]);
+scanf("%d", &at[i]);
+printf("Enter first CPU burst for Process P%d: ",pid[i]);
+scanf("%d", &bt1[i]);
+bt2[i] = (rand() % 5) + 1;
+}
+
+printf("\n Gantt Chart:\n|");
+
+while (completed_count < n){
+int idx = -1;
+int min_bt = INT_MAX;
+
+for(int i = 0; i < n; i++) {
+if (!completed[i] && at[i] <= current_time && bt1[i] < min_bt) {
+min_bt = bt1[i];
+idx=i;
+}
+}
+
+if(idx == -1) {
+current_time++;
+} else {
+st[idx] = current_time;
+
+current_time += bt1[idx];
+
+current_time +=2;
+
+current_time += bt2[idx];
+
+ct[idx] = current_time;
+
+tat[idx] = ct[idx] - at[idx];
+
+wt[idx] = tat[idx] - (bt1[idx] + bt2[idx]);
+
+total_tat += tat[idx];
+total_wt += wt[idx];
+
+completed[idx] = true;
+completed_count++;
+
+printf(" P%d |", pid[idx]);
+}
+}
+
+printf("\n\nProcess\tAT\tBT1\tBT2\tCT\tTAT\tWT\n");
+for(int i = 0; i<n; i++) {
+printf("P%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+pid[i], at[i], bt1[i], bt2[i], ct[i], tat[i], wt[i]);
+} 
+printf("\n Average Turnaround Time: %.2f\n", total_tat /n);
+printf("Average Waiting Time :  %.2f\n", total_wt /n);
+
+return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Slip 3,7,20  FCFS
+#include<stdio.h>
+#include<stdlib.h>
+#include<time.h>
+
+#define MAX 100
+
+int main() {
+int  n;
+int pid[MAX], at[MAX], bt1[MAX], bt2[MAX];
+int st[MAX], et[MAX], tat[MAX], wt[MAX];
+int completed = 0;
+int current_time = 0;
+int total_tat = 0, total_wt = 0;
+
+srand(time(NULL));
+
+printf("Enter number of processes: ");
+scanf("%d",&n);
+
+for(int i =0;i<n;i++) {
+pid[i] = i+1;
+printf("Enter arrival time of processes P%d: ",pid[i]);
+scanf("%d", &at[i]);
+printf("Enter first CPU burst for processes p%d: ", pid[i]);
+scanf("%d", &bt1[i]);
+
+bt2[i] =(rand() % 5) + 1;
+}
+
+for (int i = 0;i < n-1;i++) {
+for (int j=0;j<n-i-1;j++) {
+if (at[j] > at[j+1]) {
+
+int temp = at[j];
+at[j] = at[j + 1];
+at[j + 1] = temp;
+
+temp = pid[j];
+pid[j] = pid[j + 1];
+pid[j + 1] = temp;
+
+// swap CPU bursts
+temp = bt1[j];
+bt1[j] = bt1[j+1];
+bt1[j+1]=temp;
+
+temp = bt2[j];
+bt2[j] = bt2[j+1];
+bt2[j+1]= temp;
+}
+}
+}
+
+printf("\n Gantt chart:\n|");
+
+for (int i = 0; i < n; i++) {
+if (current_time < at[i]) {
+current_time = at[i];
+}
+
+st[i] = current_time;
+
+current_time += bt1[i];
+
+current_time += 2;
+
+current_time += bt2[i];
+
+et[i] = current_time;
+
+tat[i] = et[i] - at[i];
+
+wt[i] = tat[i] - (bt1[i] + bt2[i]);
+
+total_tat += tat[i];
+total_wt += wt[i];
+printf(" p%d |", pid[i]);
+}
+
+printf("\n\nProcess\tAT\tBT1\tBT2\tCT\tTAT\tWT\n");
+for(int i = 0; i < n; i++) {
+printf("P%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+pid[i], at[i], bt1[i], bt2[i], et[i], tat[i], wt[i]);
+}
+printf("\nAverage Turnaround Time: %.2f\n", total_tat / n);
+printf("Average Waiting Time  : %.2f\n", total_wt / n);
+return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//slip4,19 1520 bankers 
+#include<stdio.h>
+#include<stdbool.h>
+
+int main() {
+int P=5, R=4;
+int i,j;
+
+int need[P][R];
+
+int available[4] = {1,5,2,0};
+
+int allocation[5][4] ={
+{0,0,1,2},
+{1,0,0,0},
+{1,3,5,4},
+{0,6,3,2},
+{0,0,1,4}
+};
+
+int max[5][4] ={
+{0,0,1,2},
+{1,7,5,0},
+{2,3,5,6},
+{0,6,5,2},
+{0,6,5,6}
+};
+
+printf("\n Need matrix :\n");
+for(i=0;i<P;i++){
+for(j=0;j<R;j++) {
+need[i][j] = max[i][j] - allocation[i][j];
+printf("%d\t",need[i][j]);
+}
+printf("\n");
+}
+
+bool finish[5] = {false,false,false,false,false};
+int work[4];
+for(j=0;j<R;j++) {
+work[j] =available[j];
+}
+
+int safeSeq[5];
+int count = 0;
+
+while(count < P) {
+bool found = false;
+for(i=0;i<P;i++){
+if (!finish[i]) {
+bool canAllocate = true;
+for(j=0;j<R;j++) {
+if(need[i][j] > work[j]) {
+canAllocate = false;
+break;
+}
+}
+
+if(canAllocate) {
+for(j=0;j<R;j++) {
+work [j] += allocation[i][j];
+}
+safeSeq[count] = i;
+count++;
+finish[i] = true;
+found = true;
+}
+}
+}
+if(!found){
+break;
+}
+}
+
+if(count == P) {
+printf("\n System is in a SAFE state.\n Safe sequence is:");
+for(i=0;i<P;i++) {
+printf("P%d", safeSeq[i]);
+if(i != P -1) {
+printf(" -> ");
+}
+}
+printf("\n");
+} else {
+printf("\n System is NOT in a safe state.\n");
+}
+
+int processID = 1;
+int request[4] = {0,4,2,0};
+
+printf("\n Request  from P%d: (0,4,2,0)\n", processID);
+
+bool canGrant = true;
+
+for(j=0;j<R;j++)  {
+if(request[j] > need[processID][j]) {
+canGrant = false ;
+break;
+}
+}
+
+if(canGrant) {
+for(j=0;j<R;j++) {
+if (request[j] > available[j]) {
+canGrant = false;
+break;
+}
+}
+}
+
+if(canGrant) {
+for(j=0;j<R;j++) {
+available[j] -= request[j];
+allocation[processID][j] += request[j];
+need[processID][j] -= request[j];
+}
+
+bool finishAfter[5] = {false,false, false, false,false};
+int workAfter[4];
+for(j=0;j<R;j++) {
+workAfter[j] = available[j];
+}
+int safeSeqAfter[5];
+int countAfter = 0;
+
+while (countAfter < P) {
+bool found = false;
+for(i=0;i<P;i++)  {
+if(!finishAfter[i]) {
+bool canAllocate = true;
+for(j=0;j<R;j++) {
+if(need[i][j] > workAfter[j]) {
+canAllocate = false;
+break;
+}
+}
+if(canAllocate) {
+for(j=0;j<R;j++) {
+workAfter[j] += allocation[i][j];
+}
+safeSeqAfter[countAfter] = i;
+countAfter++;
+finishAfter[i] = true;
+found = true;
+}
+}
+}
+if(!found) {
+break;
+}
+}
+
+if (countAfter == P) {
+    printf("Request can be granted immediately.\nSafe sequence after granting request: ");
+    for (i = 0; i < P; i++) {
+        printf("P%d", safeSeqAfter[i]);
+        if (i != P - 1) {
+            printf(" -> ");
+        }
+    }
+    printf("\n");
+} else {
+    printf("Request cannot be granted as it leads to unsafe state.\n");
+}
+
+
+for (j = 0; j < R; j++) {
+    available[j] += request[j];
+    allocation[processID][j] -= request[j];
+    need[processID][j] += request[j];
+}
+} else {
+    printf("Request cannot be granted immediately due to insufficient resources or exceeding needs.\n");
+}
+
+return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//slip8,18,17,16                optimal
+#include<stdio.h>
+int n=16, nf; 
+int in[20]={12,15,12,18,6,8,11,12,19,12,6,8,12,15,19,8}; 
+int p[50];
+int hit=0;
+int i,j,k;
+int pgfaultcnt=0;
+
+void getData()
+{
+printf("\nEnter number of Frames:");
+scanf("%d", &nf);
+}
+
+void initialize()
+{
+pgfaultcnt=0;
+for(i=0; i<nf; i++)
+p[i]=9999;
+}
+
+int isHit(int data)
+{
+hit=0;
+for(j=0; j<nf; j++)
+{
+if(p[j]==data)
+{
+hit=1;
+break;
+}
+}
+return hit;
+}
+
+int getHitIndex(int data)
+{
+int hitind;
+for(k=0; k<nf; k++)
+{
+if(p[k]==data)
+{
+hitind=k;
+break;
+}
+}
+return hitind;
+}
+
+void dispPages()
+{
+for(k=0; k<nf; k++)
+{
+if(p[k]!=9999)
+printf("%d",p[k]);
+}
+}
+
+void dispPgFaultCnt()
+{
+printf("\nTotal number of page faults:%d",pgfaultcnt);
+}
+
+void optimal()
+{
+initialize();
+int near[50];
+for(i=0; i<n; i++)
+{
+printf("\nFor %d :", in[i]);
+
+if(isHit(in[i])==0)
+{
+for(j=0; j<nf;j++)
+{
+int pg =p[j];
+int found= 0;
+for(k=i;k<n;k++)
+{
+if(pg==in[k])
+{
+near[j] = k;
+found = 1;
+break;
+}
+else
+found = 0;
+}
+if(!found)
+near[j]=9999;
+}
+int max = -9999;
+int repindex;
+for(j=0; j<nf;j++)
+{
+if(near[j]>max)
+{
+max = near[j];
+repindex=j;
+}
+}
+p[repindex]=in[i];
+pgfaultcnt++;
+dispPages();
+}
+else
+printf("No pages fault");
+}
+dispPgFaultCnt();
+}
+
+int main()
+{
+getData();
+optimal();
+}
+
+

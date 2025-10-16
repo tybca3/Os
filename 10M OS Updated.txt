@@ -1,0 +1,255 @@
+//Slip1,5,13
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/resource.h>
+
+int main() {
+    int pid = fork();
+
+    if (pid == 0) {
+        nice(-5);
+        printf("Child: PID = %d (High Priority)\n", getpid());
+    } 
+    else if (pid > 0) {
+        printf("Parent: PID = %d\n", getpid());
+    } 
+    else {
+        perror("fork failed");
+    }
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+//slip2,11
+#include<stdio.h>
+#include<unistd.h>
+int main()
+{
+int pid = fork();
+if(pid==0) {
+printf("Child: PID = %d,Parent = %d\n",getpid(),getpid());
+}
+else{
+printf("Parent: PID=%d, Child=%d\n",getpid(),pid);
+}
+return 0;
+}
+
+
+
+
+
+//Slip3
+#include <stdio.h>
+#include <unistd.h>
+
+int main() {
+    int pid = fork();
+
+    if (pid == 0)
+        execlp("ls", "ls", NULL);
+    else if (pid > 0)
+        printf("Parent PID = %d, Child PID = %d\n", getpid(), pid);
+    else
+        perror("fork failed");
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+//Slip4,10,12
+#include<stdio.h>
+#include<unistd.h>
+int main() {
+int pid = fork();
+if(pid>0)
+printf("Parent exiting ....... PID=%d\n",getpid());
+else {
+sleep(5);
+printf("Child became orphan, new parent = %d\n",getppid());
+}
+return 0;
+}
+
+//Slip6,14,16
+#include<stdio.h>
+#include<time.h>
+int main () {
+clock_t start = clock();
+for(int i=0; i<1000000;i++);
+clock_t end = clock();
+printf("Execution Time : %f sec\n",(double)(end-start)/CLOCKS_PER_SEC);
+return 0;
+}
+
+
+
+
+
+
+//Slip7
+#include<stdio.h>
+#include<unistd.h>
+int main() {
+int pid = fork();
+if(pid==0)
+printf("Child running PID=%d\n",getpid());
+else{
+printf("Parent sleeping....\n");
+sleep(3);
+printf("Parent wokeup\n");
+}
+return 0;
+}
+
+
+
+
+
+
+
+//Slip9,15,19,20
+#include<stdio.h>
+#include<unistd.h>
+int main() {
+int pid = fork();
+if(pid == 0)
+execlp("ls","ls",NULL);
+else {
+printf("Parent sleeping....\n");
+sleep(2);
+printf("Parent finished \n");
+}
+return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Slip17,
+#include<stdio.h>
+int main() {
+int n,i;
+printf("Enter no. of processes: ");
+scanf("%d",&n);
+
+int maxNeed[n];
+printf("Enter the maximum resourrces needed for each process: \n");
+for(i=0;i<n;i++) {
+printf("Process %d :",i+1);
+scanf("%d",&maxNeed[i]);
+}
+int Rmin=1;
+for(i=0;i<n;i++) {
+Rmin+=(maxNeed[i]-1);
+}
+printf("\n Mimimun number of resources needed to avoid deadlock: %d\n",Rmin);
+return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Slip8,18
+#include<stdio.h>
+int main() {
+int n, m;
+int i, j;
+printf("Enter the number of processes: ");
+scanf("%d",&n);
+
+printf("Enter the number of resources: ");
+scanf("%d",&m);
+
+int alloc[n][m], max[n][m], need[n][m];
+
+printf("\nEnter alloctaion matrix (%d x %d):\n",n, m);
+for(i=0;i<n;i++) {
+for(j=0;j<m;j++) {
+scanf("%d",&alloc[i][j]);
+}
+}
+
+printf("\nEnter maximum matrix (%d x %d):\n",n, m);
+for(i=0;i<n;i++) {
+for(j=0;j<m;j++) {
+scanf("%d",&max[i][j]);
+}
+}
+
+for(i=0;i<n;i++) {
+for(j=0;j<m;j++) {
+need[i][j] = max[i][j] - alloc[i][j];
+}
+}
+
+printf("\nneed matrix \n");
+for(i=0;i<n;i++) {
+for(j=0;j<m;j++) {
+printf("%d\t", need[i][j]);
+}
+printf("\n");
+}
+ 
+ return 0;
+ }
+
